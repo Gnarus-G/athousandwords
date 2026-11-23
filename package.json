@@ -1,0 +1,20 @@
+{
+  "name": "athousandwords-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "esbuild web/renderer.js --bundle --format=iife --outfile=web/dist/renderer.js --log-level=warning",
+    "test": "playwright test",
+    "test:ssh": "node scripts/ssh-smoke.mjs",
+    "test:desktop": "playwright test -c playwright.desktop.config.js"
+  },
+  "dependencies": {
+    "mermaid": "^11.15.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "electron": "45.4.1",
+    "esbuild": "^0.27.0"
+  }
+}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>A Thousand Words</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/keyboard.js" defer></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <aside class="navigation">
+    <header class="brand"><span class="brand-mark" aria-hidden="true">▧</span><div>A Thousand Words<small>A place to show an idea.</small></div></header>
+    <h2>Conversations</h2>
+    <nav id="workspaces" aria-label="Conversations"></nav>
+    <div class="visual-navigation"><h2>Visuals</h2><nav id="visuals" aria-label="Visuals"></nav></div>
+    <footer><span id="connection-status" role="status">Connecting…</span><button id="delete-workspace" class="quiet danger" hidden>Delete workspace</button></footer>
+  </aside>
+  <main>
+    <div id="error" role="alert" hidden></div>
+    <header class="visual-toolbar">
+      <div><p id="workspace-title">Your visual companion</p><h1 id="visual-title">Make room for an idea.</h1></div>
+      <div class="toolbar-tools">
+        <div class="keyboard-tools"><button id="quick-switcher" aria-label="Quick switcher">Switch <kbd>Ctrl K</kbd></button><button id="keyboard-help" aria-label="Keyboard shortcuts">Keys <kbd>?</kbd></button></div>
+        <div class="revision-controls" hidden><label for="revision">Revision</label><select id="revision" aria-label="Revision"></select><button id="latest" hidden></button><button id="delete-visual" class="quiet danger">Delete visual</button></div>
+      </div>
+    </header>
+    <p id="description" hidden></p>
+    <section id="canvas" aria-label="Visual surface" tabindex="0">
+      <div id="empty"><div class="empty-drawing" aria-hidden="true">□ ─── ◇ ─── ○</div><h2>Show, then discuss.</h2><p>Choose a conversation. Diagrams, drawings, images, and interactive ideas arrive here.</p><p>Start with <code>atw workspace create</code>, then connect your agent.</p></div>
+    </section>
+    <div class="canvas-footer"><span id="render-status" role="status">Waiting for a visual</span><span id="revision-note"></span></div>
+  </main>
+  <aside class="comments" aria-label="Visual feedback">
+    <header><h2>Discuss this visual</h2><p id="comment-context">Comments stay with the revision you viewed.</p></header>
+    <div id="comments" aria-live="polite"></div>
+    <form id="comment-form" hidden><label for="comment">Comment</label><textarea id="comment" rows="4" maxlength="16384" placeholder="What needs explaining?" required></textarea><button type="submit">Add comment</button><span id="comment-status" role="status"></span></form>
+  </aside>
+  <dialog id="command-palette" aria-labelledby="palette-title">
+    <header><h2 id="palette-title">Quick switcher</h2><p>Find a conversation, visual, or action.</p></header>
+    <label class="visually-hidden" for="palette-query">Find a command or visual</label>
+    <input id="palette-query" type="search" role="combobox" autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="palette-results" aria-expanded="false" placeholder="Type to find…">
+    <ul id="palette-results" role="listbox" aria-label="Matches"></ul>
+    <p id="palette-empty" hidden>No matches. Try another name or action.</p>
+    <footer><span><kbd>↑</kbd><kbd>↓</kbd> choose</span><span><kbd>Enter</kbd> open</span><span><kbd>Esc</kbd> dismiss</span></footer>
+  </dialog>
+  <dialog id="shortcut-help" aria-labelledby="shortcuts-title">
+    <header><h2 id="shortcuts-title">Keyboard shortcuts</h2><button id="close-help" aria-label="Close keyboard shortcuts">Close <kbd>Esc</kbd></button></header>
+    <table><tbody>
+      <tr><th><kbd>Ctrl K</kbd> / <kbd>⌘ K</kbd> / <kbd>/</kbd></th><td>Find conversations, visuals, and actions</td></tr>
+      <tr><th><kbd>F6</kbd> / <kbd>Shift F6</kbd></th><td>Next / previous pane</td></tr>
+      <tr><th><kbd>Alt 1</kbd> <kbd>Alt 2</kbd> <kbd>Alt 3</kbd> <kbd>Alt 4</kbd></th><td>Conversations, visuals, canvas, comment</td></tr>
+      <tr><th><kbd>j</kbd> / <kbd>k</kbd> or <kbd>↓</kbd> / <kbd>↑</kbd></th><td>Move through a focused navigation list; Enter selects</td></tr>
+      <tr><th><kbd>[</kbd> / <kbd>]</kbd></th><td>Older / newer revision</td></tr>
+      <tr><th><kbd>g</kbd></th><td>Follow the latest revision</td></tr>
+      <tr><th><kbd>c</kbd></th><td>Write a comment on this revision</td></tr>
+      <tr><th><kbd>Ctrl Enter</kbd> / <kbd>⌘ Enter</kbd></th><td>Add the comment</td></tr>
+      <tr><th><kbd>Enter</kbd> on the canvas</th><td>Enter an interactive rendering</td></tr>
+      <tr><th><kbd>Esc</kbd></th><td>Dismiss an overlay or return to the canvas</td></tr>
+      <tr><th><kbd>?</kbd></th><td>Show this help</td></tr>
+      <tr><th><kbd>Ctrl W</kbd> / <kbd>Ctrl Q</kbd></th><td>Close the desktop window</td></tr>
+    </tbody></table>
+    <p>Letter shortcuts leave text fields alone. Ctrl K, F6, and Escape also work inside renderings in the desktop app.</p>
+  </dialog>
+</body>
+</html>

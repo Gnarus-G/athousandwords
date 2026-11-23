@@ -1,0 +1,14 @@
+<style>
+  main { max-width: 650px; margin: 40px auto; font: 17px/1.6 sans-serif; color: #25364a; }
+  input { width: 100%; } .comparison { display: flex; gap: 24px; align-items: end; height: 180px; }
+  .bar { width: 120px; background: #275ea8; min-height: 12px; transition: height .12s; }
+  .bar:first-child { background: #a7bdd8; height: 120px; } output { font-weight: 600; }
+</style>
+<main>
+  <h1>Make the comparison tangible.</h1>
+  <p>A small interactive rendering can communicate a changing relationship.</p>
+  <div class="comparison"><div class="bar"></div><div class="bar" id="variable" style="height:120px"></div></div>
+  <label for="ratio">Second quantity: <output id="value">100%</output></label>
+  <input id="ratio" type="range" min="10" max="150" value="100"
+    oninput="document.getElementById('variable').style.height=(this.value*1.2)+'px';document.getElementById('value').value=this.value+'%'">
+</main>
