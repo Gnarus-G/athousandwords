@@ -10,7 +10,7 @@
 </head>
 <body>
   <aside class="navigation">
-    <header class="brand"><span class="brand-mark" aria-hidden="true">▧</span><div>A Thousand Words<small>A place to show an idea.</small></div></header>
+    <header class="brand"><span class="brand-mark" aria-hidden="true">▧</span><div>A Thousand Words</div></header>
     <h2>Conversations</h2>
     <nav id="workspaces" aria-label="Conversations"></nav>
     <div class="visual-navigation"><h2>Visuals</h2><nav id="visuals" aria-label="Visuals"></nav></div>
@@ -19,7 +19,7 @@
   <main>
     <div id="error" role="alert" hidden></div>
     <header class="visual-toolbar">
-      <div><p id="workspace-title">Your visual companion</p><h1 id="visual-title">Make room for an idea.</h1></div>
+      <div><p id="workspace-title">Your visual companion</p><h1 id="visual-title">Select a visual</h1></div>
       <div class="toolbar-tools">
         <div class="keyboard-tools"><button id="quick-switcher" aria-label="Quick switcher">Switch <kbd>Ctrl K</kbd></button><button id="keyboard-help" aria-label="Keyboard shortcuts">Keys <kbd>?</kbd></button></div>
         <div class="revision-controls" hidden><label for="revision">Revision</label><select id="revision" aria-label="Revision"></select><button id="latest" hidden></button><button id="delete-visual" class="quiet danger">Delete visual</button></div>
@@ -27,14 +27,14 @@
     </header>
     <p id="description" hidden></p>
     <section id="canvas" aria-label="Visual surface" tabindex="0">
-      <div id="empty"><div class="empty-drawing" aria-hidden="true">□ ─── ◇ ─── ○</div><h2>Show, then discuss.</h2><p>Choose a conversation. Diagrams, drawings, images, and interactive ideas arrive here.</p><p>Start with <code>atw workspace create</code>, then connect your agent.</p></div>
+      <div id="empty"><h2>Waiting for a visual</h2><p>Press <kbd>Ctrl K</kbd> to find a conversation or visual.</p><p>Ask your agent to show a diagram, image, or rendering.</p></div>
     </section>
     <div class="canvas-footer"><span id="render-status" role="status">Waiting for a visual</span><span id="revision-note"></span></div>
   </main>
   <aside class="comments" aria-label="Visual feedback">
-    <header><h2>Discuss this visual</h2><p id="comment-context">Comments stay with the revision you viewed.</p></header>
+    <header><h2>Feedback</h2><p id="comment-context">Comments stay with the revision you viewed.</p></header>
     <div id="comments" aria-live="polite"></div>
-    <form id="comment-form" hidden><label for="comment">Comment</label><textarea id="comment" rows="4" maxlength="16384" placeholder="What needs explaining?" required></textarea><button type="submit">Add comment</button><span id="comment-status" role="status"></span></form>
+    <form id="comment-form" hidden><label for="comment">Comment <kbd aria-hidden="true">c</kbd></label><textarea id="comment" rows="4" maxlength="16384" placeholder="What needs explaining?" required></textarea><button type="submit">Add comment <kbd aria-hidden="true">Ctrl Enter</kbd></button><span id="comment-status" role="status"></span></form>
   </aside>
   <dialog id="command-palette" aria-labelledby="palette-title">
     <header><h2 id="palette-title">Quick switcher</h2><p>Find a conversation, visual, or action.</p></header>

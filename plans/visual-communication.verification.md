@@ -109,6 +109,21 @@ capture confirmed the dedicated app displayed that revision with Switch/Ctrl K
 and Keys/? controls, without browser chrome. The capture is an agent-owned temporary
 artifact at `/tmp/opencode/athousandwords-desktop.png`.
 
+## Dark workbench refinement
+
+The user requested dark mode and an intentional frontend-design pass. The compact
+palette, typography, layout comparison, and self-critique are recorded in
+`docs/ui-design.md`. Dark styling now covers the native window, chrome, forms,
+dialogs, and Mermaid diagrams; indexed navigation replaces rounded cards and the
+decorative grid is removed. Media is centered without changing authored HTML.
+
+The dark build passed all ten browser checks and the desktop check. The centering
+follow-up passed the image-format and keyboard-only cases and subsequent desktop
+runs, including the final build. The installed app was reloaded, revision 3 again
+reported rendered with a connected viewer, and an unobscured desktop capture was
+inspected at `/tmp/opencode/athousandwords-dark-desktop.png`. Temporary fullscreen
+inspection was returned to the normal window state afterward.
+
 ## Limits and licensing
 
 - MCP was exercised through a real protocol client, not by installing configuration

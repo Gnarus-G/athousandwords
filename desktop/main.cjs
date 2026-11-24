@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, dialog, session } = require('electron');
+const { app, BrowserWindow, Menu, dialog, session, nativeTheme } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
@@ -27,7 +27,7 @@ function createWindow() {
   target.hash = new URLSearchParams({ token }).toString();
   window = new BrowserWindow({
     title: 'A Thousand Words', width: 1280, height: 900, minWidth: 800, minHeight: 600,
-    backgroundColor: '#ffffff', show: false, autoHideMenuBar: true,
+    backgroundColor: '#181923', show: false, autoHideMenuBar: true,
     webPreferences: { nodeIntegration: false, nodeIntegrationInSubFrames: false, contextIsolation: true, sandbox: true, webviewTag: false, backgroundThrottling: false },
   });
   window.setMenu(null);
@@ -82,6 +82,7 @@ if (!app.requestSingleInstanceLock()) {
     if (!commandLine.includes('--background')) { if (window.isMinimized()) window.restore(); window.show(); window.focus(); }
   });
   app.whenReady().then(() => {
+    nativeTheme.themeSource = 'dark';
     Menu.setApplicationMenu(null);
     session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
     session.defaultSession.setPermissionCheckHandler(() => false);

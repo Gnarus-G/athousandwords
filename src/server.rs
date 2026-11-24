@@ -104,7 +104,7 @@ async fn asset(Path(file): Path<String>) -> Result<Response> {
 }
 async fn frame(headers: HeaderMap) -> Result<Response> {
     let host = host(&headers)?;
-    let mut response=Html("<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><style>html{color:#25364a;background:white;font:16px/1.5 'Noto Sans',sans-serif}body{margin:24px}img,svg{max-width:100%;height:auto}#render-root{min-height:100px}button,input,select{font:inherit}</style><script src='/static/renderer.js' defer></script></head><body><div id='render-root'></div></body></html>").into_response();
+    let mut response=Html("<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><style>html{color-scheme:dark;color:#e7e5e0;background:#181923;font:16px/1.5 Cantarell,'Noto Sans',sans-serif}body{margin:24px}img,svg{max-width:100%;height:auto}#render-root{min-height:100px}#render-root.visual-media{min-height:calc(100vh - 48px);display:flex;align-items:center;justify-content:center}.visual-media>svg,.visual-media>img{flex-shrink:0}button,input,select{font:inherit}</style><script src='/static/renderer.js' defer></script></head><body><div id='render-root'></div></body></html>").into_response();
     response.headers_mut().insert("content-security-policy",HeaderValue::from_str(&format!("default-src 'none'; script-src 'unsafe-inline' http://{host}/static/renderer.js; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; frame-ancestors 'self'" )).unwrap());
     response.headers_mut().insert(
         "connection-allowlist",

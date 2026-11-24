@@ -86,7 +86,7 @@ function resetVisual() {
   knownVisuals = [];
   keyboard?.refresh();
   pendingCommentFocus = false;
-  $('visual-frame')?.remove(); $('empty').hidden = false; $('visual-title').textContent = 'Make room for an idea.';
+  $('visual-frame')?.remove(); $('empty').hidden = false; $('visual-title').textContent = 'Select a visual';
   $('description').hidden = true; document.querySelector('.revision-controls').hidden = true; $('comment-form').hidden = true; $('comments').replaceChildren();
   $('render-status').textContent = 'Waiting for a visual'; $('revision-note').textContent = '';
   commentAvailability();

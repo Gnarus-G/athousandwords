@@ -7,7 +7,6 @@ Done when: MCP and CLI deliver and revise visuals locally and through SSH; publi
 - The user wants diagrams, screenshots, drawings, and other renderings, choosing whatever communicates an idea best.
 - A dedicated desktop app and a custom Rust companion are required. The user corrected the browser-first approach after trying it.
 - The user accepted all four round-one recommendations: proactive display without focus theft; remote agents in the first usable version; simple visual-linked feedback; presentation of externally supplied content.
-- Reuse the visual surface rather than requiring manual link navigation for each visual.
 - Content generation and screenshot capture are separate capabilities, outside this program's initial responsibility.
 - The user accepted SSH-forwarded remote connections without required hosting/accounts; one companion with separate conversation workspaces; stable visuals with revision history; explicit feedback read/wait; isolated self-contained interactive JavaScript.
 - The user accepted round three: local persistence until explicit deletion; unread indications rather than workspace switching; whole-visual revision-linked comments; explicit remote asset transfer; distinct acceptance/render/error/no-viewer states; Linux desktop and remote agents first.
@@ -16,6 +15,7 @@ Done when: MCP and CLI deliver and revise visuals locally and through SSH; publi
 - Implementation finding: CSP alone allowed WebRTC traffic. The dedicated app supplies Chromium 156 with Connection-Allowlist, independently of the default browser.
 - User requested OpenCode setup: installed globally through the dotfiles home profile, with a home-only user service and a shared “OpenCode on home” workspace. Details: opencode-setup.md.
 - Keyboard-first GUI is a priority: core navigation, visual/revision selection, comments, and shortcut discovery must be usable without a mouse.
+- User prefers a dark theme; dark is the default for the app, dialogs, native window, and diagram renderer.
 
 ## Agreed first-version scope (approved for implementation)
 - A local visual viewer, MCP adapter, and CLI calling the same application logic.
@@ -34,6 +34,7 @@ Done when: MCP and CLI deliver and revise visuals locally and through SSH; publi
 - 2026-11-23: user clarified “unlicensed” means no license grant, not the Unlicense public-domain dedication.
 - 2026-11-23: user: “It should open automatically the first time at least” and “It should be a standalone app, not a webpage in my default browser.” These replace the earlier manual-launch/browser-first decisions.
 - 2026-11-23: user: “the GUI should be keyboard first. I'm extremely partial to keyboard experiences.”
+- 2026-11-23: user requested a dark theme and supplied frontend-design guidance; use the visual-workbench direction recorded in docs/ui-design.md.
 
 ## Licensing constraint
 - No license grant for project code: no LICENSE file; npm metadata UNLICENSED; no Cargo license declaration. Existing third-party notices remain intact.
