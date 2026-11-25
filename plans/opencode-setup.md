@@ -63,5 +63,5 @@ To open or raise the desktop app explicitly:
 
 The user service starts on subsequent user-manager/login starts. After rebuilding
 the application, restart it with `systemctl --user restart athousandwords.service`.
-The app is keyboard-first: Ctrl K searches, ? lists shortcuts, F6 cycles panes,
+The app is keyboard-first: Ctrl K searches, ? lists shortcuts,
 [ / ] selects revisions, and c / Ctrl Enter writes and sends a comment.

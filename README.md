@@ -155,10 +155,11 @@ No shared directory, public listener, or cloud relay is needed.
 
 ## Presentation and feedback
 
-The GUI is keyboard-first. **Ctrl K** opens the searchable switcher, **?** shows
-all shortcuts, **F6** cycles panes, **[ / ]** changes revisions, **c** starts a
-comment, and **Ctrl Enter** adds it. **j/k** navigate focused lists. App-level
-navigation also works when focus is inside a rendering. See [the keyboard guide](docs/keyboard.md).
+The GUI is a full-window canvas with one status line. **Ctrl K** opens the
+searchable switcher for conversations, visuals, and actions; **?** shows all
+shortcuts, **[ / ]** changes revisions, **c** opens feedback, and **Ctrl Enter**
+adds a comment. Ctrl K and Escape also work when focus is inside a rendering.
+See [the keyboard guide](docs/keyboard.md) and [the UI design](docs/ui-design.md).
 
 - Separate conversations have their own visual lists. Other conversations show
   unread indicators without switching the current view. Short workspace IDs

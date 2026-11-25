@@ -51,7 +51,9 @@ test('the dedicated desktop window renders a diagram without exposing Node to co
     await expect(page.getByRole('region',{name:'Visual surface'})).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page.locator('#visual-frame')).toBeFocused();
-    await nativeKey('F6');
+    await nativeKey('Escape');
+    await expect(page.getByRole('region',{name:'Visual surface'})).toBeFocused();
+    await page.keyboard.press('c');
     await expect(page.getByLabel('Comment')).toBeFocused();
     await nativeKey('Escape');
     await page.route('**/api/viewer',async route=>{

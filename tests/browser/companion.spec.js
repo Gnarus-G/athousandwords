@@ -27,12 +27,22 @@ test.beforeAll(async () => {
   // Only test-generated local credentials are used, and are never logged.
   admin = (await readFile(join(directory, 'admin.token'), 'utf8')).trim();
 });
+async function openConversation(page, title) {
+  await page.keyboard.press('Control+k');
+  await page.getByRole('combobox', { name: 'Find a command or visual' }).fill(title);
+  await page.getByRole('option').filter({ hasText: title }).filter({ hasText: 'Conversation' }).first().click();
+  await expect(page.locator('#workspace-title')).toHaveText(title);
+}
+async function openFeedback(page) {
+  const toggle = page.getByRole('button', { name: /^Feedback/ });
+  if (await toggle.getAttribute('aria-expanded') !== 'true') await toggle.click();
+}
 test.afterAll(async () => { process?.kill(); if (directory) await rm(directory, { recursive: true, force: true }); });
 
 test('a visual appears, revisions stay inspectable, and comments target the viewed revision', async ({ page }) => {
   const workspace = await api('/workspaces', { method: 'POST', body: { title: 'Architecture discussion' } });
   await page.goto(`${url}/#token=${encodeURIComponent(admin)}`);
-  await page.getByRole('button', { name: 'Architecture discussion', exact: true }).click();
+  await openConversation(page, 'Architecture discussion');
   const publish = body => api('/visuals', { token: workspace.token, method: 'POST', body });
   const first = await publish({ title: 'The visual loop', format: 'mermaid', content: 'graph LR; Agent-->Companion; Companion-->Person; Person-->|Comment|Agent' });
   await expect(page.getByRole('heading', { name: 'The visual loop' })).toBeVisible();
@@ -45,6 +55,7 @@ test('a visual appears, revisions stay inspectable, and comments target the view
   await publish({ id: first.id, expected_revision: second.revision, title: 'The visual loop', format: 'html', content: '<h1>Third version</h1>' });
   await expect(page.getByRole('button', { name: 'Show latest (revision 3)' })).toBeVisible();
   await expect(page.getByLabel('Revision')).toHaveValue('1');
+  await openFeedback(page);
   await page.getByLabel('Comment').fill('Explain the feedback arrow.');
   await page.getByRole('button', { name: 'Add comment' }).click();
   await expect.poll(async () => (await api('/feedback', { token: workspace.token })).comments.length).toBe(1);
@@ -65,14 +76,14 @@ test('interactive content cannot read owner state or reach external and control 
     await writeFile(join(directory,'filesystem-probe.txt'),'This is an innocuous test fixture.');
     const w = await api('/workspaces', { method: 'POST', body: { title: 'Isolation checks' } });
     await page.goto(`${url}/#token=${encodeURIComponent(admin)}`);
-    await page.getByRole('button', { name: 'Isolation checks', exact: true }).click();
+    await openConversation(page, 'Isolation checks');
     const visual = await api('/visuals', { token: w.token, method: 'POST', body: {
       title: 'An isolated interaction', format: 'html', content: `<h1>Interactive, not privileged</h1><p id="access"></p><p id="file"></p><button onclick="this.textContent='It works'">Try it</button><script>
       try { parent.sessionStorage.getItem('atw.owner'); document.getElementById('access').textContent='Owner state exposed'; } catch { document.getElementById('access').textContent='Owner state inaccessible'; }
       fetch('${origin}/fetch').catch(()=>{}); new Image().src='${origin}/image';
       fetch('/api/workspaces').catch(()=>{});
       fetch('file://${directory}/filesystem-probe.txt').then(()=>{document.getElementById('file').textContent='Filesystem exposed'}).catch(()=>{document.getElementById('file').textContent='Filesystem access refused'});
-      setTimeout(()=>{location.href='${origin}/navigation'},150);
+      setTimeout(()=>{location.href='${origin}/navigation'},1000);
       </script>`
     } });
     const frame = page.frameLocator('#visual-frame');
@@ -81,7 +92,8 @@ test('interactive content cannot read owner state or reach external and control 
     await frame.getByRole('button', { name: 'Try it' }).click();
     await expect(frame.getByRole('button', { name: 'It works' })).toBeVisible();
     await expect.poll(async () => (await api(`/status/${visual.id}/1`, { token: w.token })).render_status).toBe('rendered');
-    await page.waitForTimeout(300);
+    // The content navigates itself after 1s, leaving time to prove the click works first.
+    await page.waitForTimeout(1300);
     expect(requests).toBe(0);
     // Chromium may replace a self-navigating frame with its blocked-navigation
     // page; the contract is that no request reaches the destination.
@@ -91,7 +103,7 @@ test('interactive content cannot read owner state or reach external and control 
 test('all image formats render and malformed diagrams report failure rather than acceptance', async ({ page }) => {
   const w = await api('/workspaces', { method: 'POST', body: { title: 'Rendering checks' } });
   await page.goto(`${url}/#token=${encodeURIComponent(admin)}`);
-  await page.getByRole('button', { name: 'Rendering checks', exact: true }).click();
+  await openConversation(page, 'Rendering checks');
   const images = await page.evaluate(() => {
     const canvas = document.createElement('canvas'); canvas.width = 60; canvas.height = 40;
     const context = canvas.getContext('2d'); context.fillStyle = '#275ea8'; context.fillRect(0, 0, 60, 40);
@@ -114,11 +126,11 @@ test('another workspace stays unread without switching views and offline publica
   const a = await api('/workspaces', { method: 'POST', body: { title: 'Currently reading' } });
   const b = await api('/workspaces', { method: 'POST', body: { title: 'Another agent' } });
   await page.goto(`${url}/#token=${encodeURIComponent(admin)}`);
-  await page.getByRole('button', { name: 'Currently reading', exact: true }).click();
+  await openConversation(page, 'Currently reading');
   await api('/visuals', { token: a.token, method: 'POST', body: { title: 'Keep this visible', format: 'html', content: '<h1>Reading this</h1>' } });
   await expect(page.frameLocator('#visual-frame').getByRole('heading', { name: 'Reading this' })).toBeVisible();
   const other = await api('/visuals', { token: b.token, method: 'POST', body: { title: 'Do not switch', format: 'html', content: '<h1>Another conversation</h1>' } });
-  await expect(page.getByRole('button', { name: 'Another agent', exact: true })).toContainText('New visuals');
+  await expect(page.getByRole('button', { name: 'New visuals in Another agent' })).toBeVisible();
   await expect(page.frameLocator('#visual-frame').getByRole('heading', { name: 'Reading this' })).toBeVisible();
   expect((await api(`/status/${other.id}/1`, { token: b.token })).render_status).toBe('accepted');
   await page.close();
@@ -127,7 +139,7 @@ test('another workspace stays unread without switching views and offline publica
   expect(offline.presentation.viewer_connected).toBe(false);
   const reopened = await context.newPage();
   await reopened.goto(`${url}/#token=${encodeURIComponent(admin)}`);
-  await reopened.getByRole('button', { name: 'Another agent', exact: true }).click();
+  await openConversation(reopened, 'Another agent');
   await expect(reopened.frameLocator('#visual-frame').getByRole('heading', { name: 'Latest after reconnect' })).toBeVisible();
   await expect(reopened.getByLabel('Revision')).toHaveValue('2');
   await expect(reopened.getByLabel('Revision').locator('option')).toHaveCount(2);
@@ -136,9 +148,10 @@ test('another workspace stays unread without switching views and offline publica
 test('a comment draft keeps its original revision when a live update arrives', async ({ page }) => {
   const w = await api('/workspaces', { method: 'POST', body: { title: 'Draft anchoring' } });
   await page.goto(`${url}/#token=${encodeURIComponent(admin)}`);
-  await page.getByRole('button', { name: 'Draft anchoring', exact: true }).click();
+  await openConversation(page, 'Draft anchoring');
   const first = await api('/visuals', { token: w.token, method: 'POST', body: { title: 'Draft target', format: 'html', content: '<h1>Original</h1>' } });
   await expect(page.frameLocator('#visual-frame').getByRole('heading', { name: 'Original' })).toBeVisible();
+  await openFeedback(page);
   await page.getByLabel('Comment').fill('This comment is about the original.');
   await api('/visuals', { token: w.token, method: 'POST', body: { id: first.id, expected_revision: 1, title: 'Draft target', format: 'html', content: '<h1>Updated</h1>' } });
   await expect(page.frameLocator('#visual-frame').getByRole('heading', { name: 'Updated' })).toBeVisible();
@@ -150,7 +163,7 @@ test('a comment draft keeps its original revision when a live update arrives', a
 test('deletion targets the displayed visual even while another publication is loading', async ({ page }) => {
   const w = await api('/workspaces', { method: 'POST', body: { title: 'Deletion identity' } });
   await page.goto(`${url}/#token=${encodeURIComponent(admin)}`);
-  await page.getByRole('button', { name: 'Deletion identity', exact: true }).click();
+  await openConversation(page, 'Deletion identity');
   const a = await api('/visuals', { token: w.token, method: 'POST', body: { title: 'Still displayed', format: 'html', content: '<h1>Still displayed</h1>' } });
   await expect(page.frameLocator('#visual-frame').getByRole('heading', { name: 'Still displayed' })).toBeVisible();
   let release, blocked = false;
@@ -162,11 +175,10 @@ test('deletion targets the displayed visual even while another publication is lo
   const b = await api('/visuals', { token: w.token, method: 'POST', body: { title: 'Still loading', format: 'html', content: '<h1>Still loading</h1>' } });
   await expect.poll(() => blocked).toBe(true);
   page.once('dialog', dialog => dialog.accept());
-  await page.getByRole('button', { name: 'Delete visual', exact: true }).click();
-  const visuals = await api('/visuals', { token: w.token });
+  await page.keyboard.press('Control+k'); await page.keyboard.type('Delete this visual'); await page.keyboard.press('Enter');
+  await expect.poll(async () => (await api('/visuals', { token: w.token })).some(v => v.id === a.id)).toBe(false);
   release();
-  expect(visuals.some(v => v.id === a.id)).toBe(false);
-  expect(visuals.some(v => v.id === b.id)).toBe(true);
+  expect((await api('/visuals', { token: w.token })).some(v => v.id === b.id)).toBe(true);
 });
 
 test('the rendering boundary blocks WebRTC STUN traffic as well as HTTP', async ({ page }) => {
@@ -176,7 +188,7 @@ test('the rendering boundary blocks WebRTC STUN traffic as well as HTTP', async 
   try {
     const w = await api('/workspaces', { method: 'POST', body: { title: 'WebRTC boundary' } });
     await page.goto(`${url}/#token=${encodeURIComponent(admin)}`);
-    await page.getByRole('button', { name: 'WebRTC boundary', exact: true }).click();
+    await openConversation(page, 'WebRTC boundary');
     await api('/visuals', { token: w.token, method: 'POST', body: { title: 'UDP probe', format: 'html', content: `<p id="probe">Starting probe</p><script>
       (async()=>{try { const pc=new RTCPeerConnection({iceServers:[{urls:'stun:127.0.0.1:${socket.address().port}'}]}); pc.createDataChannel('probe'); await pc.setLocalDescription(await pc.createOffer()); document.getElementById('probe').textContent='Probe attempted'; } catch { document.getElementById('probe').textContent='Probe blocked'; }})();
       </script>` } });
@@ -189,7 +201,7 @@ test('the rendering boundary blocks WebRTC STUN traffic as well as HTTP', async 
 test('a lost rendering acknowledgment is retried without replacing the visual', async ({ page }) => {
   const w = await api('/workspaces', { method: 'POST', body: { title: 'Acknowledgment retry' } });
   await page.goto(`${url}/#token=${encodeURIComponent(admin)}`);
-  await page.getByRole('button', { name: 'Acknowledgment retry', exact: true }).click();
+  await openConversation(page, 'Acknowledgment retry');
   let attempts = 0;
   await page.route('**/api/render', route => { attempts++; return attempts === 1 ? route.abort() : route.continue(); });
   const visual = await api('/visuals', { token: w.token, method: 'POST', body: { title: 'Retry confirmation', format: 'html', content: '<h1>Rendered once</h1>' } });
@@ -218,12 +230,13 @@ test('an MCP tool call reaches the viewer and the agent reads the person’s com
     child.stdin.write('{"jsonrpc":"2.0","method":"notifications/initialized"}\n');
     expect((await ask('tools/list')).tools.some(t => t.name === 'show_visual')).toBe(true);
     await page.goto(`${url}/#token=${encodeURIComponent(admin)}`);
-    await page.getByRole('button', { name: 'MCP round trip', exact: true }).click();
+    await openConversation(page, 'MCP round trip');
     const shown = await tool('show_visual', { title: 'From the agent’s actual tool', format: 'mermaid', local_file: resolve('examples/loop.mmd') });
     expect(shown.isError).toBe(false);
     const identity = { id: shown.structuredContent.id, revision: shown.structuredContent.revision };
     await expect(page.getByRole('heading', { name: 'From the agent’s actual tool', exact: true })).toBeVisible();
     await expect.poll(async () => (await tool('visual_status', identity)).structuredContent.render_status).toBe('rendered');
+    await openFeedback(page);
     await page.getByLabel('Comment').fill('Please explain the return path.');
     await page.getByRole('button', { name: 'Add comment' }).click();
     const feedback = await tool('read_feedback', { after: 0, wait_ms: 1000 });
@@ -238,7 +251,7 @@ test('keyboard-only workflow switches conversations, inspects revisions, and com
   const first=await api('/visuals',{token:w.token,method:'POST',body:{title:'Keyboard diagram',format:'html',content:'<h1>Original keyboard visual</h1>'}});
   await api('/visuals',{token:w.token,method:'POST',body:{id:first.id,expected_revision:1,title:'Keyboard diagram',format:'html',content:'<h1>Latest keyboard visual</h1>'}});
   await page.goto(`${url}/#token=${encodeURIComponent(admin)}`);
-  await expect(page.getByRole('button',{name:'Keyboard discussion',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Quick switcher'})).toBeVisible();
   const switchTo=async query=>{
     await page.keyboard.press('Control+k');
     await expect(page.getByRole('combobox',{name:'Find a command or visual'})).toBeFocused();
@@ -269,22 +282,16 @@ test('keyboard-only workflow switches conversations, inspects revisions, and com
   await expect(page.getByRole('dialog',{name:'Keyboard shortcuts'})).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog',{name:'Keyboard shortcuts'})).not.toBeVisible();
-  await page.keyboard.press('F6');
-  await expect(page.getByLabel('Comment')).toBeFocused();
-  await page.keyboard.press('Shift+F6');
-  await expect(page.getByRole('region',{name:'Visual surface'})).toBeFocused();
-  await page.keyboard.press('Alt+1');
-  await expect(page.getByRole('button',{name:'Keyboard discussion',exact:true})).toBeFocused();
-  await page.keyboard.press('j');
-  await expect(page.getByRole('button',{name:'Another keyboard conversation',exact:true})).toBeFocused();
-  await page.keyboard.press('Enter');
+  await switchTo('Another keyboard conversation');
   await expect(page.locator('#workspace-title')).toHaveText('Another keyboard conversation');
   await switchTo('Keyboard discussion');
   await switchTo('Keyboard diagram');
   await expect(page.frameLocator('#visual-frame').getByRole('heading',{name:'Latest keyboard visual'})).toBeVisible();
-  await page.keyboard.press('Alt+2');
-  await expect(page.getByRole('button',{name:'Keyboard diagram',exact:true})).toBeFocused();
+  await page.keyboard.press('c');
+  await expect(page.getByLabel('Comment')).toBeFocused();
   await api('/visuals',{token:w.token,method:'POST',body:{id:first.id,expected_revision:2,title:'Keyboard diagram',format:'html',content:'<h1>Updated without stealing focus</h1>'}});
   await expect(page.frameLocator('#visual-frame').getByRole('heading',{name:'Updated without stealing focus'})).toBeVisible();
-  await expect(page.getByRole('button',{name:'Keyboard diagram',exact:true})).toBeFocused();
+  await expect(page.getByLabel('Comment')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('complementary',{name:'Visual feedback'})).toBeHidden();
 });

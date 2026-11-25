@@ -41,8 +41,6 @@ function createWindow() {
     let command;
     if (modified && key === 'k') command = 'switcher';
     else if (input.key === 'Escape') command = 'escape';
-    else if (input.key === 'F6') command = input.shift ? 'previous-pane' : 'next-pane';
-    else if (input.alt && /^[1-4]$/.test(input.key)) command = `pane-${input.key}`;
     if (command) {
       event.preventDefault();
       window.webContents.executeJavaScript(`window.atwKeyboardCommand?.(${JSON.stringify(command)})`).catch(() => {});
